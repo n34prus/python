@@ -7,20 +7,20 @@ import plotly.graph_objects as go
 import os
 
 #настраиваем красивый вывод в консоль наших будущих данных
-cmd = 'mode 200,50'
+cmd = 'mode 250,70'
 os.system(cmd)
 pd.set_option("display.max_columns", None)
 pd.set_option('display.width', 2000)
 
 ### тут выбираем данные для анализа (подгружаем с Yahoo Finance)                                                                                    ###
 #акции мета за последний год на дневных свечках
-df = yf.Ticker('FB').history(period='1y')[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
+#df = yf.Ticker('FB').history(period='1y')[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
 
 #курс битка за последний год на дневных свечках
 #df = yf.Ticker('BTC-USD').history(period='1y')[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
 
 #курс битка за последние два месяца на часовых свечках
-#df = yf.Ticker('BTC-USD').history(start="2021-10-20", end="2021-11-17", interval="1h")[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
+df = yf.Ticker('BTC-USD').history(start="2021-10-20", end="2021-11-17", interval="1h")[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
 
 ### тут добавлем разные вспомогательные и ключевые признаки                                                                                         ###
 # вычисляем MACD: macdh это гистограмма, macds это медленный скользящий уровень, macd это macd :)
@@ -33,41 +33,72 @@ df['sign'] = df['macds_12_26_9'] < df['macd_12_26_9']
 df['cross'] = df['sign'].diff()
 
 ### для обычного MACD база df1 (да знаю это нерациональная трата ресурсов плодить базы вместо просто добавления новых метрик)                       ###
-df1 = df
+df1 = df.copy(deep = True)
 #покупка в случае пересечения снизу
 df1['buy'] = (df1['cross'] == True) & (df1['sign'] == True)
 #продажа в случае пересечения сверху
 df1['sold'] = (df1['cross'] == True) & (df1['sign'] == False)
 
 ### для опережающего MACD база df2, пытаемся предугадать поведение графиков при помощи линейной экстраполяции по двум точкам                        ###
-df2 = df
+df2 = df.copy(deep = True)
 #потом заполню) кажется через локальные экстремумы будет интереснее результат
 
 ### для локальных экстремумов MACD база df3, пытаемся работать на опережение, надо обязательно проверить на диапазоне падения цены!                 ###
-df3 = df
+df3 = df.copy(deep = True)
 #дифференцируем
 df3['dif'] = df3['macd_12_26_9'].diff()
 #знак угла наклона
 df3['signdif'] = df3['dif'] >= 0
 #выделяем локальные экстремумы
 df3['extremum'] = df3['signdif'].diff()
-print(df3)
+#print(df3)
 #покупка в случае пересечения снизу
-df3['buy'] = (df3['extremum'] == True) & (df3['signdif'] == True)
+df3['buy'] = (df3['extremum'] == True) & (df3['signdif'] == True) & (np.isnan(df3['macds_12_26_9']) == False)
 #продажа в случае пересечения сверху
-df3['sold'] = (df3['extremum'] == True) & (df3['signdif'] == False)
+df3['sold'] = (df3['extremum'] == True) & (df3['signdif'] == False) & (np.isnan(df3['macds_12_26_9']) == False)
 
-def normalise(_df):     #первой точкой должна быть покупка, последней точкой должна быть продажа, отсев двойных покупок и продаж, 
-    #_df = _df
+def normalise(_df):     #приводим данные в удобный для отрисовки и обработки вид
     #заполняем простой значениями NaN чтобы график был адекватный
     _df.loc[_df['buy'] == False, 'buy'] = np.nan
     _df.loc[_df['sold'] == False, 'sold'] = np.nan
+
+
+    #запоминаем тип последней транзакции, False если продажа и True если покупка. 
+    #_df.loc[(_df['sold'] == True) & np.isnull(_df['macds_12_26_9']), 'sold'] = False
+    #_df.loc[(_df['sold'] == True) & (_df['macds_12_26_9'].isnull()), 'sold'] = False
+    #заполняем столбец значениями типа пследней транзакции
+    #_df.loc[_df['buy'] == True, 'lasttrans'] = True
+    #_df.loc[_df['sold'] == True, 'lasttrans'] = False
+    #_df.loc[(_df['lasttrans'] != True) & (_df['lasttrans'] != False), 'lasttrans'] = _df['lasttrans'].shift(1)
+    #_df.loc[(_df['lasttrans'] != True) & (_df['lasttrans'] != False), 'lasttrans'] = _df['lasttrans'].shift(1)
+    #по идее теперь неплохо было бы сделать на целевых ячейках с транзакциями сделать сдвиг по последней транзакции вниз чтобы искать дубликаты
+    #_df.loc[(_df['lasttrans'] == _df['buy']) | (_df['lasttrans'] == _df['sold']), 'lasttrans'] = _df['lasttrans'].shift(1)
+    #не работает так как эта шляпа не цикл а переход по итератору. сасай. потом придумаем что с этим делать.
+
     return _df
 
-
 def calculateTransaction(_df):      #подсчет затрат (expense) и дохода (income) во время транзацкий
-    _df.loc[_df['buy'] == True, 'expense'] = _df['close']
+    #так, тут некоторая магия, которая работает вот так:
+    #вычисляем индекс первой продажи и покупки
+    fsi = _df[_df.sold==True].first_valid_index()
+    fbi = _df[_df.buy==True].first_valid_index()
+    #print ('first valid index is ', a)
+    #если продажа идет раньше покупки, то не производим транзакцию
+    #(тут я отменяю sold, но это плохо т.к. продажа не будет отрисовываться на графике, а я хочу её видеть)
+    #if fsi < fbi:
+    #    _df.loc[_df.index == fsi, 'sold'] = np.nan
+    #а теперь в кучу! не трогаем sold и аккуратно просто не учитываем эту транзакцию в профите :
     _df.loc[_df['sold'] == True, 'income'] = _df['close']
+    if fsi < fbi:
+        _df.loc[_df.index == fsi, 'income'] = np.nan
+    #теперь не учитывает последнюю покупку если за ней не было продажи, также чтобы профит корректно считать:
+    #ищем индексы последней покупки и продажи
+    lsi = _df.iloc[::-1][_df.sold==True].first_valid_index()
+    lbi = _df.iloc[::-1][_df.buy==True].first_valid_index()
+    #исключаем граничную покупку из расчетов профита
+    _df.loc[_df['buy'] == True, 'expense'] = _df['close']
+    if lsi < lbi:
+        _df.loc[_df.index == lbi, 'expense'] = np.nan
     return _df
 
 def showPlot(_df):      # рисуем картинки
@@ -231,5 +262,10 @@ def executeAll(_df):    # для удобства
 #df2 - MACD с опережением (линейная эксраполяция на одну свечку)
 #df3 - принятие решений на основании лолкальных экстремумов MACD
 
-printDf(df3, 'extremum')
+print("MACD calculating (df1):")
+executeAll(df1)
+print("MACD extremum calculating (df3):")
 executeAll(df3)
+#printDf(df3, 'extremum')
+#print(df3.head(50))
+#print(df3.tail(50))

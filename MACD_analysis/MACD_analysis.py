@@ -16,11 +16,14 @@ pd.set_option('display.width', 2000)
 #акции мета за последний год на дневных свечках
 #df = yf.Ticker('FB').history(period='1y')[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
 
+#курс доллара к евро за последний год на дневных свечках
+df = yf.Ticker('ETH-BTC').history(start="2021-10-20", end="2021-11-19", interval="15m")[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
+
 #курс битка за последний год на дневных свечках
 #df = yf.Ticker('BTC-USD').history(period='1y')[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
 
 #курс битка за последние два месяца на часовых свечках
-df = yf.Ticker('BTC-USD').history(start="2021-10-20", end="2021-11-17", interval="1h")[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
+#df = yf.Ticker('BTC-USD').history(start="2021-10-20", end="2021-11-17", interval="1h")[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
 
 ### тут добавлем разные вспомогательные и ключевые признаки                                                                                         ###
 # вычисляем MACD: macdh это гистограмма, macds это медленный скользящий уровень, macd это macd :)
@@ -56,6 +59,7 @@ df3['extremum'] = df3['signdif'].diff()
 df3['buy'] = (df3['extremum'] == True) & (df3['signdif'] == True) & (np.isnan(df3['macds_12_26_9']) == False)
 #продажа в случае пересечения сверху
 df3['sold'] = (df3['extremum'] == True) & (df3['signdif'] == False) & (np.isnan(df3['macds_12_26_9']) == False)
+
 
 def normalise(_df):     #приводим данные в удобный для отрисовки и обработки вид
     #заполняем простой значениями NaN чтобы график был адекватный

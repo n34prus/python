@@ -14,19 +14,16 @@ pd.set_option('display.width', 2000)
 
 ### тут выбираем данные для анализа (подгружаем с Yahoo Finance)                                                                                    ###
 #акции мета за последний год на дневных свечках
-df = yf.Ticker('FB').history(period='1y')[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
-
-#курс 
-#df = yf.Ticker('ETH-BTC').history(start="2021-10-20", end="2021-11-19", interval="15m")[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
+#df = yf.Ticker('FB').history(period='1y')[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
 
 #курс доллара к евро за последний год на дневных свечках
-#df = yf.Ticker('EURUSD=X').history(start="2015-02-01", end="2020-01-01", interval="1d")[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
+#df = yf.Ticker('ETH-BTC').history(start="2021-10-20", end="2021-11-19", interval="15m")[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
 
 #курс битка за последний год на дневных свечках
 #df = yf.Ticker('BTC-USD').history(period='1y')[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
 
 #курс битка за последние два месяца на часовых свечках
-#df = yf.Ticker('BTC-USD').history(start="2021-11-01", end="2021-12-11", interval="1h")[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
+df = yf.Ticker('BTC-USD').history(start="2021-12-01", end="2021-12-10", interval="1h")[map(str.title, ['open', 'close', 'low', 'high', 'volume'])]
 
 ### тут добавлем разные вспомогательные и ключевые признаки                                                                                         ###
 # вычисляем MACD: macdh это гистограмма, macds это медленный скользящий уровень, macd это macd :)
@@ -34,60 +31,35 @@ df.ta.macd(close='close', fast=12, slow=26, append=True)
 # первый символ в лоуеркейсе
 df.columns = [x.lower() for x in df.columns]
 #добавляем признак разница slow и macd
-df['sign'] = df['macds_12_26_9'] < df['macd_12_26_9']
+#df['sign'] = df['macds_12_26_9'] < df['macd_12_26_9']
 #проверяем смену знака (тобишь пересечение графиков)
-df['cross'] = df['sign'].diff()
+#df['cross'] = df['sign'].diff()
 
 ### тут будем размечать точки входа и выхода для оптимальной выгода                       ###
-df0 = df.copy(deep = True)
+df1 = df.copy(deep = True)
 #давайте интерполируем значения а то заебал этот яху свечки терять
 #на линейной интерполяции кривые свеки получаются так что пожалуй просто закомменчу этот кусок пока
-#deltaT = df0.shift(1).first_valid_index() - df0.first_valid_index() #номинальный таймфрейм
+#deltaT = df1.shift(1).first_valid_index() - df1.first_valid_index() #номинальный таймфрейм
 #date_index = pd.date_range(start = '11/30/2021 20:00', periods=48, freq='H', tz=0)
-#print("\nold indexes: ", df0.index)
+#print("\nold indexes: ", df1.index)
 #print("\nnew indexes: ", date_index)
-#df0 = df0.reindex(date_index)
-#df0 = df0.interpolate()
+#df1 = df1.reindex(date_index)
+#df1 = df1.interpolate()
 #знак угла наклона
-df0['dif'] = df0['close'].diff() #>=0
+df1['dif'] = df1['close'].diff() #>=0
 #знак угла наклона
-df0['signdif'] = df0['dif'] >= 0
+df1['signdif'] = df1['dif'] >= 0
 #выделяем локальные экстремумы
-df0['extremum'] = df0['signdif'].diff()
+df1['extremum'] = df1['signdif'].diff()
 #print(df3)
 #покупка в случае пересечения снизу
-df0['buy'] = (df0['extremum'] == True) & (df0['signdif'] == True)
+df1['buy'] = (df1['extremum'] == True) & (df1['signdif'] == True)
 #продажа в случае пересечения сверху
-df0['sold'] = (df0['extremum'] == True) & (df0['signdif'] == False)
+df1['sold'] = (df1['extremum'] == True) & (df1['signdif'] == False)
 #сдвигаем всё на шаг назад. ведь нам разметка нужна а она может заглянуть на одну свечку вперед :)
-df0['buy'] = df0['buy'].shift(-1)
-df0['sold'] = df0['sold'].shift(-1)
-
-
-### для обычного MACD база df1 (да знаю это нерациональная трата ресурсов плодить базы вместо просто добавления новых метрик)                       ###
-df1 = df.copy(deep = True)
-#покупка в случае пересечения снизу
-df1['buy'] = (df1['cross'] == True) & (df1['sign'] == True)
-#продажа в случае пересечения сверху
-df1['sold'] = (df1['cross'] == True) & (df1['sign'] == False)
-
-### для опережающего MACD база df2, пытаемся предугадать поведение графиков при помощи линейной экстраполяции по двум точкам                        ###
-df2 = df.copy(deep = True)
-#потом заполню) кажется через локальные экстремумы будет интереснее результат
-
-### для локальных экстремумов MACD база df3, пытаемся работать на опережение, надо обязательно проверить на диапазоне падения цены!                 ###
-df3 = df.copy(deep = True)
-#дифференцируем
-df3['dif'] = df3['macd_12_26_9'].diff()
-#знак угла наклона
-df3['signdif'] = df3['dif'] >= 0
-#выделяем локальные экстремумы
-df3['extremum'] = df3['signdif'].diff()
-#print(df3)
-#покупка в случае пересечения снизу
-df3['buy'] = (df3['extremum'] == True) & (df3['signdif'] == True) & (np.isnan(df3['macds_12_26_9']) == False)
-#продажа в случае пересечения сверху
-df3['sold'] = (df3['extremum'] == True) & (df3['signdif'] == False) & (np.isnan(df3['macds_12_26_9']) == False)
+df1['buy'] = df1['buy'].shift(-1)
+df1['sold'] = df1['sold'].shift(-1)
+#df1['sold'] = df1['sold'].change.shift(1)
 
 
 def normalise(_df):     #приводим данные в удобный для отрисовки и обработки вид
@@ -260,7 +232,7 @@ def calcProfit (_df):   # выводим баланс из расчета транзакций одной катируемой 
     expense = _df['expense'].sum()
     #суммарный доход
     income = _df['income'].sum()
-    #прибыль
+    #прибыль лол кек я неправильно считал)
     profit = income - expense
     #прибыль в % от стоимости первой покупки
     fbi = _df[_df.buy==True].first_valid_index()
@@ -294,14 +266,20 @@ def executeAll(_df):    # для удобства
     calcProfit(_df)
     showPlot(_df)
 
-#df1 - базовая MACD
-#df2 - MACD с опережением (линейная эксраполяция на одну свечку)
-#df3 - принятие решений на основании лолкальных экстремумов MACD
 
-print("\nMACD calculating (df1):")
-executeAll(df1)
-print("\nMACD extremum calculating (df3):")
-executeAll(df3)
-#printDf(df3, 'extremum')
+print("total frames: ", df1.shape[0])
+df1 = normalise(df1)
+df1 = calculateTransaction(df1)
+calcProfit(df1)
+showPlot(df1)
+print("buy: ", df1['buy'].value_counts())
+print("sold: ", df1['sold'].value_counts())
+
+#print("MACD calculating (df1):")
+#executeAll(df1)
+#print("MACD extremum calculating (df3):")
+#executeAll(df3)
+
+#print(df1)
 #print(df3.head(50))
 #print(df3.tail(50))

@@ -1,4 +1,4 @@
-# -*- coding: cp1251 -*-
+#
 import os
 import requests
 import pandas as pd
@@ -7,7 +7,7 @@ from datetime import datetime
 pd.set_option('display.width', 1000)
 pd.set_option('display.max_columns', 20)
 
-# замена всех пробелов в названиях столбцов на _
+# Р·Р°РјРµРЅР° РІСЃРµС… РїСЂРѕР±РµР»РѕРІ РІ РЅР°Р·РІР°РЅРёСЏС… СЃС‚РѕР»Р±С†РѕРІ РЅР° _
 def replace_spaces(_df):
     new_col_name = ''
     for old_col_name in _df.columns:
@@ -16,7 +16,7 @@ def replace_spaces(_df):
             _df = _df.rename(columns={old_col_name: new_col_name})
     return _df
 
-# все столбцы в нижний регистр
+# РІСЃРµ СЃС‚РѕР»Р±С†С‹ РІ РЅРёР¶РЅРёР№ СЂРµРіРёСЃС‚СЂ
 def replace_uppers(_df):
     new_col_name = ''
     for old_col_name in _df.columns:
@@ -25,12 +25,12 @@ def replace_uppers(_df):
             _df = _df.rename(columns={old_col_name: new_col_name})
     return _df
 
-#0. Подготовка данных (не выводится)
-# Загрузите датасет bookings.csv с разделителем ;.
-# Проверьте размер таблицы, типы переменных, а затем выведите первые 7 строк, чтобы посмотреть на данные.
-# Приведите названия колонок к нижнему регистру и замените пробелы на знак нижнего подчеркивания.
+#0. РџРѕРґРіРѕС‚РѕРІРєР° РґР°РЅРЅС‹С… (РЅРµ РІС‹РІРѕРґРёС‚СЃСЏ)
+# Р—Р°РіСЂСѓР·РёС‚Рµ РґР°С‚Р°СЃРµС‚ bookings.csv СЃ СЂР°Р·РґРµР»РёС‚РµР»РµРј ;.
+# РџСЂРѕРІРµСЂСЊС‚Рµ СЂР°Р·РјРµСЂ С‚Р°Р±Р»РёС†С‹, С‚РёРїС‹ РїРµСЂРµРјРµРЅРЅС‹С…, Р° Р·Р°С‚РµРј РІС‹РІРµРґРёС‚Рµ РїРµСЂРІС‹Рµ 7 СЃС‚СЂРѕРє, С‡С‚РѕР±С‹ РїРѕСЃРјРѕС‚СЂРµС‚СЊ РЅР° РґР°РЅРЅС‹Рµ.
+# РџСЂРёРІРµРґРёС‚Рµ РЅР°Р·РІР°РЅРёСЏ РєРѕР»РѕРЅРѕРє Рє РЅРёР¶РЅРµРјСѓ СЂРµРіРёСЃС‚СЂСѓ Рё Р·Р°РјРµРЅРёС‚Рµ РїСЂРѕР±РµР»С‹ РЅР° Р·РЅР°Рє РЅРёР¶РЅРµРіРѕ РїРѕРґС‡РµСЂРєРёРІР°РЅРёСЏ.
 
-#проверяем наличие скачанной ксвшки, если нет то докачиваем
+#РїСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ СЃРєР°С‡Р°РЅРЅРѕР№ РєСЃРІС€РєРё, РµСЃР»Рё РЅРµС‚ С‚Рѕ РґРѕРєР°С‡РёРІР°РµРј
 csvfile = 'bookings.csv'
 if not os.access(csvfile, os.F_OK):
     res = requests.get('https://stepik.org/media/attachments/lesson/360344/' + csvfile)
@@ -41,12 +41,12 @@ if not os.access(csvfile, os.F_OK):
 bookings = pd.read_csv(csvfile, sep=';')
 #print(bookings.dtypes.value_counts())
 
-#нормализация столбцов (специально разными функциями, так задумано)
+#РЅРѕСЂРјР°Р»РёР·Р°С†РёСЏ СЃС‚РѕР»Р±С†РѕРІ (СЃРїРµС†РёР°Р»СЊРЅРѕ СЂР°Р·РЅС‹РјРё С„СѓРЅРєС†РёСЏРјРё, С‚Р°Рє Р·Р°РґСѓРјР°РЅРѕ)
 bookings = replace_spaces(bookings)
 bookings = replace_uppers(bookings)
 #print(bookings)
 
-#1. Пользователи из каких стран совершили наибольшее число успешных бронирований? Укажите топ-5.
+#1. РџРѕР»СЊР·РѕРІР°С‚РµР»Рё РёР· РєР°РєРёС… СЃС‚СЂР°РЅ СЃРѕРІРµСЂС€РёР»Рё РЅР°РёР±РѕР»СЊС€РµРµ С‡РёСЃР»Рѕ СѓСЃРїРµС€РЅС‹С… Р±СЂРѕРЅРёСЂРѕРІР°РЅРёР№? РЈРєР°Р¶РёС‚Рµ С‚РѕРї-5.
 sucsess_rate = bookings \
     .query('is_canceled == 0') \
     .groupby('country', as_index=False) \
@@ -54,24 +54,24 @@ sucsess_rate = bookings \
     .sort_values('is_canceled', ascending=False)
 sucsess_rate = sucsess_rate.rename(columns={'is_canceled': 'is_sucsess'})
 sucsess_rate = sucsess_rate.reset_index(drop=True)
-#print('\n1. Страны с наибольшим чисом успешных бронирований:\n', sucsess_rate.head(5))
+#print('\n1. РЎС‚СЂР°РЅС‹ СЃ РЅР°РёР±РѕР»СЊС€РёРј С‡РёСЃРѕРј СѓСЃРїРµС€РЅС‹С… Р±СЂРѕРЅРёСЂРѕРІР°РЅРёР№:\n', sucsess_rate.head(5))
 
-#2. На сколько ночей в среднем бронируют отели разных типов? точность 2 знака
+#2. РќР° СЃРєРѕР»СЊРєРѕ РЅРѕС‡РµР№ РІ СЃСЂРµРґРЅРµРј Р±СЂРѕРЅРёСЂСѓСЋС‚ РѕС‚РµР»Рё СЂР°Р·РЅС‹С… С‚РёРїРѕРІ? С‚РѕС‡РЅРѕСЃС‚СЊ 2 Р·РЅР°РєР°
 ch_rh_mean = bookings \
     .groupby('hotel', as_index=False) \
     .agg({'stays_total_nights': 'mean'}) \
     .round(2)
 ch_rh_mean = ch_rh_mean.rename(columns={'stays_total_nights': 'stays_mean_nights'})
-#print('\n2. Средняя длительность брони для разных типов отелей:\n', ch_rh_mean)
+#print('\n2. РЎСЂРµРґРЅСЏСЏ РґР»РёС‚РµР»СЊРЅРѕСЃС‚СЊ Р±СЂРѕРЅРё РґР»СЏ СЂР°Р·РЅС‹С… С‚РёРїРѕРІ РѕС‚РµР»РµР№:\n', ch_rh_mean)
 
-#3. Иногда тип номера, полученного клиентом (assigned_room_type), отличается от изначально забронированного (reserved_room_type).
-# Такое может произойти, например, по причине овербукинга. Сколько подобных наблюдений встретилось в датасете?
+#3. РРЅРѕРіРґР° С‚РёРї РЅРѕРјРµСЂР°, РїРѕР»СѓС‡РµРЅРЅРѕРіРѕ РєР»РёРµРЅС‚РѕРј (assigned_room_type), РѕС‚Р»РёС‡Р°РµС‚СЃСЏ РѕС‚ РёР·РЅР°С‡Р°Р»СЊРЅРѕ Р·Р°Р±СЂРѕРЅРёСЂРѕРІР°РЅРЅРѕРіРѕ (reserved_room_type).
+# РўР°РєРѕРµ РјРѕР¶РµС‚ РїСЂРѕРёР·РѕР№С‚Рё, РЅР°РїСЂРёРјРµСЂ, РїРѕ РїСЂРёС‡РёРЅРµ РѕРІРµСЂР±СѓРєРёРЅРіР°. РЎРєРѕР»СЊРєРѕ РїРѕРґРѕР±РЅС‹С… РЅР°Р±Р»СЋРґРµРЅРёР№ РІСЃС‚СЂРµС‚РёР»РѕСЃСЊ РІ РґР°С‚Р°СЃРµС‚Рµ?
 overbooking = bookings.query('assigned_room_type != reserved_room_type').shape[0]
-#print('\n3. Количество случаев заселения клиента в тип номера, отличный от забронированного: {} ({}%)'.format(overbooking, round(overbooking/bookings.shape[0], 2)))
+#print('\n3. РљРѕР»РёС‡РµСЃС‚РІРѕ СЃР»СѓС‡Р°РµРІ Р·Р°СЃРµР»РµРЅРёСЏ РєР»РёРµРЅС‚Р° РІ С‚РёРї РЅРѕРјРµСЂР°, РѕС‚Р»РёС‡РЅС‹Р№ РѕС‚ Р·Р°Р±СЂРѕРЅРёСЂРѕРІР°РЅРЅРѕРіРѕ: {} ({}%)'.format(overbooking, round(overbooking/bookings.shape[0], 2)))
 
-#4. На какой месяц чаще всего успешно оформляли бронь в 2016? Изменился ли самый популярный месяц в 2017?
-#слишком частный пример. лучше сразу написать код для всех годов в датасете
-#статистика по месяцам всех лет:
+#4. РќР° РєР°РєРѕР№ РјРµСЃСЏС† С‡Р°С‰Рµ РІСЃРµРіРѕ СѓСЃРїРµС€РЅРѕ РѕС„РѕСЂРјР»СЏР»Рё Р±СЂРѕРЅСЊ РІ 2016? РР·РјРµРЅРёР»СЃСЏ Р»Рё СЃР°РјС‹Р№ РїРѕРїСѓР»СЏСЂРЅС‹Р№ РјРµСЃСЏС† РІ 2017?
+#СЃР»РёС€РєРѕРј С‡Р°СЃС‚РЅС‹Р№ РїСЂРёРјРµСЂ. Р»СѓС‡С€Рµ СЃСЂР°Р·Сѓ РЅР°РїРёСЃР°С‚СЊ РєРѕРґ РґР»СЏ РІСЃРµС… РіРѕРґРѕРІ РІ РґР°С‚Р°СЃРµС‚Рµ
+#СЃС‚Р°С‚РёСЃС‚РёРєР° РїРѕ РјРµСЃСЏС†Р°Рј РІСЃРµС… Р»РµС‚:
 month_rate = bookings \
     .query('is_canceled == 0') \
     .groupby(['arrival_date_month', 'arrival_date_year'], as_index=False) \
@@ -79,24 +79,24 @@ month_rate = bookings \
     .sort_values('is_canceled', ascending=False)
 month_rate = month_rate.rename(columns={'is_canceled': 'is_sucsess'})
 #print(month_rate)
-#выделяем самый активный месяц в году
+#РІС‹РґРµР»СЏРµРј СЃР°РјС‹Р№ Р°РєС‚РёРІРЅС‹Р№ РјРµСЃСЏС† РІ РіРѕРґСѓ
 month_rate = month_rate \
     .groupby(['arrival_date_year'], as_index=False) \
     .agg({'is_sucsess': 'max', 'arrival_date_month': 'first'}) \
     .sort_values('arrival_date_year', ascending=False)
 month_rate = month_rate.reset_index(drop=True)
 
-#четко отвечаем на поставленные вопросы
+#С‡РµС‚РєРѕ РѕС‚РІРµС‡Р°РµРј РЅР° РїРѕСЃС‚Р°РІР»РµРЅРЅС‹Рµ РІРѕРїСЂРѕСЃС‹
 answer421 = ''
 answer422 = ''
 fvi2016 = month_rate[month_rate.arrival_date_year==2016].first_valid_index()
 fvi2017 = month_rate[month_rate.arrival_date_year==2017].first_valid_index()
 if (month_rate['arrival_date_month'][fvi2016] == month_rate['arrival_date_month'][fvi2017]):
-    answer421 = 'не '
+    answer421 = 'РЅРµ '
 else:
-    answer422 = 'на: {}'.format(month_rate['arrival_date_month'][fvi2017])
-print('\n4. Самые популярные месяцы в разные годы:\n', month_rate)
-print('\n4.1 Самый популярный месяц в 2016: ', month_rate['arrival_date_month'][fvi2016])
-print(f'4.2 Самый популярный месяц в 2017 {answer421}изменился {answer422}')
+    answer422 = 'РЅР°: {}'.format(month_rate['arrival_date_month'][fvi2017])
+print('\n4. РЎР°РјС‹Рµ РїРѕРїСѓР»СЏСЂРЅС‹Рµ РјРµСЃСЏС†С‹ РІ СЂР°Р·РЅС‹Рµ РіРѕРґС‹:\n', month_rate)
+print('\n4.1 РЎР°РјС‹Р№ РїРѕРїСѓР»СЏСЂРЅС‹Р№ РјРµСЃСЏС† РІ 2016: ', month_rate['arrival_date_month'][fvi2016])
+print(f'4.2 РЎР°РјС‹Р№ РїРѕРїСѓР»СЏСЂРЅС‹Р№ РјРµСЃСЏС† РІ 2017 {answer421}РёР·РјРµРЅРёР»СЃСЏ {answer422}')
 #print(bookings)
 

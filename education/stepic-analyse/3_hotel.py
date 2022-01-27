@@ -2,6 +2,7 @@
 import os
 import requests
 import pandas as pd
+from datetime import datetime
 
 pd.set_option('display.width', 1000)
 pd.set_option('display.max_columns', 20)
@@ -45,8 +46,57 @@ bookings = replace_spaces(bookings)
 bookings = replace_uppers(bookings)
 #print(bookings)
 
+#1. ѕользователи из каких стран совершили наибольшее число успешных бронирований? ”кажите топ-5.
+sucsess_rate = bookings \
+    .query('is_canceled == 0') \
+    .groupby('country', as_index=False) \
+    .agg({'is_canceled': 'count'}) \
+    .sort_values('is_canceled', ascending=False)
+sucsess_rate = sucsess_rate.rename(columns={'is_canceled': 'is_sucsess'})
+sucsess_rate = sucsess_rate.reset_index(drop=True)
+#print('\n1. —траны с наибольшим чисом успешных бронирований:\n', sucsess_rate.head(5))
 
+#2. Ќа сколько ночей в среднем бронируют отели разных типов? точность 2 знака
+ch_rh_mean = bookings \
+    .groupby('hotel', as_index=False) \
+    .agg({'stays_total_nights': 'mean'}) \
+    .round(2)
+ch_rh_mean = ch_rh_mean.rename(columns={'stays_total_nights': 'stays_mean_nights'})
+#print('\n2. —редн€€ длительность брони дл€ разных типов отелей:\n', ch_rh_mean)
 
+#3. »ногда тип номера, полученного клиентом (assigned_room_type), отличаетс€ от изначально забронированного (reserved_room_type).
+# “акое может произойти, например, по причине овербукинга. —колько подобных наблюдений встретилось в датасете?
+overbooking = bookings.query('assigned_room_type != reserved_room_type').shape[0]
+#print('\n3.  оличество случаев заселени€ клиента в тип номера, отличный от забронированного: {} ({}%)'.format(overbooking, round(overbooking/bookings.shape[0], 2)))
 
+#4. Ќа какой мес€ц чаще всего успешно оформл€ли бронь в 2016? »зменилс€ ли самый попул€рный мес€ц в 2017?
+#слишком частный пример. лучше сразу написать код дл€ всех годов в датасете
+#статистика по мес€цам всех лет:
+month_rate = bookings \
+    .query('is_canceled == 0') \
+    .groupby(['arrival_date_month', 'arrival_date_year'], as_index=False) \
+    .agg({'is_canceled': 'count'}) \
+    .sort_values('is_canceled', ascending=False)
+month_rate = month_rate.rename(columns={'is_canceled': 'is_sucsess'})
+#print(month_rate)
+#выдел€ем самый активный мес€ц в году
+month_rate = month_rate \
+    .groupby(['arrival_date_year'], as_index=False) \
+    .agg({'is_sucsess': 'max', 'arrival_date_month': 'first'}) \
+    .sort_values('arrival_date_year', ascending=False)
+month_rate = month_rate.reset_index(drop=True)
+
+#четко отвечаем на поставленные вопросы
+answer421 = ''
+answer422 = ''
+fvi2016 = month_rate[month_rate.arrival_date_year==2016].first_valid_index()
+fvi2017 = month_rate[month_rate.arrival_date_year==2017].first_valid_index()
+if (month_rate['arrival_date_month'][fvi2016] == month_rate['arrival_date_month'][fvi2017]):
+    answer421 = 'не '
+else:
+    answer422 = 'на: {}'.format(month_rate['arrival_date_month'][fvi2017])
+print('\n4. —амые попул€рные мес€цы в разные годы:\n', month_rate)
+print('\n4.1 —амый попул€рный мес€ц в 2016: ', month_rate['arrival_date_month'][fvi2016])
+print(f'4.2 —амый попул€рный мес€ц в 2017 {answer421}изменилс€ {answer422}')
 #print(bookings)
 

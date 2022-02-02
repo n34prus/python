@@ -1,4 +1,4 @@
-# -*- coding: cp1251 -*-
+#
 import os
 import requests
 import pandas as pd
@@ -6,10 +6,10 @@ import pandas as pd
 pd.set_option('display.width', 1000)
 pd.set_option('display.max_columns', 20)
 
-#проверяем наличие скачанной ксвшки, если нет то докачиваем
-csvfile = '2_taxi_nyc.csv'
+#РїСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ СЃРєР°С‡Р°РЅРЅРѕР№ РєСЃРІС€РєРё, РµСЃР»Рё РЅРµС‚ С‚Рѕ РґРѕРєР°С‡РёРІР°РµРј
+csvfile = __file__.split(chr(92))[-1][:-2] + 'csv'
 if not os.access(csvfile, os.F_OK):
-    res = requests.get('https://stepik.org/media/attachments/lesson/360340/' + csvfile)
+    res = requests.get('https://stepik.org/media/attachments/lesson/360340/2_taxi_nyc.csv')
     with open(csvfile, 'w') as f:
         f.write(res.text)
 #print(res.text)
@@ -17,7 +17,7 @@ if not os.access(csvfile, os.F_OK):
 #taxi = pd.read_csv(r'https://stepik.org/media/attachments/lesson/360340/2_taxi_nyc.csv')
 taxi = pd.read_csv(csvfile)
 
-# заменим все пробелы в названиях столбцов на _
+# Р·Р°РјРµРЅРёРј РІСЃРµ РїСЂРѕР±РµР»С‹ РІ РЅР°Р·РІР°РЅРёСЏС… СЃС‚РѕР»Р±С†РѕРІ РЅР° _
 new_col_name = ''
 for old_col_name in taxi.columns:
     new_col_name = old_col_name.replace(' ', '_')
@@ -25,16 +25,16 @@ for old_col_name in taxi.columns:
         taxi = taxi.rename(columns={old_col_name: new_col_name})
         # print('old: {} | new: {}'.format(old_col_name, new_col_name))
 
-# распределение заказов по районам
+# СЂР°СЃРїСЂРµРґРµР»РµРЅРёРµ Р·Р°РєР°Р·РѕРІ РїРѕ СЂР°Р№РѕРЅР°Рј
 borough_rate = taxi \
     .groupby('borough', as_index=False) \
     .agg({'pickups': sum}) \
     .sort_values('pickups', ascending=False)
 # print(borough_rate)
-# запоминаем самый непопулярный район
+# Р·Р°РїРѕРјРёРЅР°РµРј СЃР°РјС‹Р№ РЅРµРїРѕРїСѓР»СЏСЂРЅС‹Р№ СЂР°Р№РѕРЅ
 min_pickups = borough_rate.borough.iloc[-1]
 
-# выбираем районы, из которых по праздникам (в среднем) поступает больше заказов, чем в обычные дни (тоже в среднем)
+# РІС‹Р±РёСЂР°РµРј СЂР°Р№РѕРЅС‹, РёР· РєРѕС‚РѕСЂС‹С… РїРѕ РїСЂР°Р·РґРЅРёРєР°Рј (РІ СЃСЂРµРґРЅРµРј) РїРѕСЃС‚СѓРїР°РµС‚ Р±РѕР»СЊС€Рµ Р·Р°РєР°Р·РѕРІ, С‡РµРј РІ РѕР±С‹С‡РЅС‹Рµ РґРЅРё (С‚РѕР¶Рµ РІ СЃСЂРµРґРЅРµРј)
 holiday_borrow_rate = taxi \
     .groupby(['borough', 'hday'], as_index=False) \
     .agg({'pickups': 'mean'}) \
@@ -50,7 +50,7 @@ holiday_borrow_rate = holiday_borrow_rate \
 holiday_borrow_rate['hday_dominate'] = holiday_borrow_rate['hday_activity'] > holiday_borrow_rate['wday_activity']
 #print(holiday_borrow_rate)
 
-# сколько поездок было по месяцам в каждом районе
+# СЃРєРѕР»СЊРєРѕ РїРѕРµР·РґРѕРє Р±С‹Р»Рѕ РїРѕ РјРµСЃСЏС†Р°Рј РІ РєР°Р¶РґРѕРј СЂР°Р№РѕРЅРµ
 pickups_by_mon_bor = taxi \
     .groupby(['pickup_month', 'borough'], as_index=False) \
     .agg({'pickups': sum}) \
@@ -58,7 +58,7 @@ pickups_by_mon_bor = taxi \
 pickups_by_mon_bor = pickups_by_mon_bor.reset_index(drop=True)
 #print(pickups_by_mon_bor)
 
-# добавить температуру в градусах цельсия
+# РґРѕР±Р°РІРёС‚СЊ С‚РµРјРїРµСЂР°С‚СѓСЂСѓ РІ РіСЂР°РґСѓСЃР°С… С†РµР»СЊСЃРёСЏ
 def temp_to_celcius(temp_F):
     return (temp_F - 32)*5.0/9.0
 

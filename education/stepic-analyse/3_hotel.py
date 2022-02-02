@@ -35,9 +35,9 @@ def replace_uppers(_df):
 # Приведите названия колонок к нижнему регистру и замените пробелы на знак нижнего подчеркивания.
 
 #проверяем наличие скачанной ксвшки, если нет то докачиваем
-csvfile = 'bookings.csv'
+csvfile = __file__.split(chr(92))[-1][:-2] + 'csv'
 if not os.access(csvfile, os.F_OK):
-    res = requests.get('https://stepik.org/media/attachments/lesson/360344/' + csvfile)
+    res = requests.get('https://stepik.org/media/attachments/lesson/360344/bookings.csv')
     with open(csvfile, 'w') as f:
         f.write(res.text)
 #print(res.text)

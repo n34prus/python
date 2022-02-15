@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 #debug_mode hiding output
 #set debug_mode to False for looking to full result
-debug_mode = True
+debug_mode = False
 
 pd.set_option('display.width', 1000)
 pd.set_option('display.max_columns', 20)
@@ -48,14 +48,67 @@ if not debug_mode:
     print(df_diag(usrlog))
 
 #2. Какой клиент совершил больше всего успешных операций?
-succ_count = usrlog \
+succ_usr = usrlog \
     .query('success == True') \
     .groupby('client', as_index=False) \
     .agg({'success':'count'}) \
     .sort_values('success', ascending=False) \
     .reset_index(drop=True)
-succ_count['is_top'] = succ_count['success'] == succ_count['success'][0]
+succ_usr['is_top'] = succ_usr['success'] == succ_usr['success'][0]
 if not debug_mode:
     print('\n2. ID клиентов, совершивших больше всех успешных операций:')
-    print(succ_count.query('is_top == True').sort_values('client').client.tolist())
+    print(succ_usr.query('is_top == True').sort_values('client').client.tolist())
 
+#3. С какой платформы осуществляется наибольшее количество успешных операций?
+succ_pltf = usrlog \
+    .query('success == True') \
+    .groupby('platform', as_index=False) \
+    .agg({'success': 'count'}) \
+    .sort_values('success', ascending=False) \
+    .reset_index(drop=True)
+succ_pltf['is_top'] = succ_pltf['success'] == succ_pltf['success'][0]
+if not debug_mode:
+    print('\n3. Больше всех успешных операций совершено с платформ:')
+    print(succ_pltf.query('is_top == True').sort_values('platform').platform.tolist())
+
+#4. Какую платформу предпочитают премиальные клиенты?
+prem_pltf_rate = usrlog \
+    .query('premium == True') \
+    .groupby('platform', as_index=False) \
+    .agg({'premium': 'count'}) \
+    .sort_values('premium', ascending=False) \
+    .reset_index(drop=True)
+prem_pltf_rate['is_top'] = prem_pltf_rate['premium'] == prem_pltf_rate['premium'][0]
+if not debug_mode:
+    print('\n4. Премиальные клиенты предпочитают платформы:')
+    print(prem_pltf_rate.query('is_top == True').sort_values('platform').platform.tolist())
+
+#5. Визуализируйте распределение возраста клиентов в зависимости от типа клиента (премиум или нет)
+#почему тайтлы криво рисуются? в документации сиборна и стековф об этом ни слова
+if not debug_mode:
+    ax_prem = sns.displot(data=usrlog, x='age', hue='premium', kind='kde')
+    ax_prem.set(xlabel='age', ylabel='prop', title='Распределение возраста пользователей')
+    plt.show()
+
+#6. Постройте график распределения числа успешных операций
+#формулировка не очень. от нас хотят увидеть сколько пользователей (y) совершили x успешных операций
+if not debug_mode:
+    ax_succ = sns.displot(data=usrlog.query('success == True').groupby('client', as_index=False).agg({'success': 'count'}), x='success', binwidth=1)
+    ax_succ.set(xlabel='number of successes', ylabel='user count', title='Распределение количества успешных операций')
+    plt.show()
+
+#7. Визуализируйте число успешных операций, сделанных на платформе computer, в зависимости от возраста, используя sns.countplot
+#(x – возраст, y – число успешных операций)
+# Клиенты какого возраста совершили наибольшее количество успешных действий?
+if not debug_mode:
+    comp_succ = usrlog \
+        .query("success == True and platform == 'computer'")
+    #    .groupby('age', as_index=False) \
+    #    .agg({'success': 'count'})
+    #print(comp_succ)
+    plt.figure(figsize=(12, 8))
+    ax_age_succ = sns.countplot(data=comp_succ, x='age')
+    ax_age_succ.set(xlabel='age', ylabel='operations count', title='Распределение количества успешных операций на пк')
+    plt.show()
+
+#print(usrlog)

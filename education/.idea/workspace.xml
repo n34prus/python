@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e861270b-65b8-4129-947d-c84c88f9e154" name="Changes" comment="поправил структру проекта&#10;теперь все датасеты при первом запуске скрипта автоматически подгружаются из инета и сохраняются рядом со скриптом с тем же названием, только .csv&#10;добавил 2_taxi_peru.py с отрисовкой распределения оценок&#10;поправил README.txt&#10;обновил конспекты по теории">
-      <change afterPath="$PROJECT_DIR$/stepic-analyse/4_operations.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/stepic-analyse/4_operations_readme.txt" afterDir="false" />
+    <list default="true" id="e861270b-65b8-4129-947d-c84c88f9e154" name="Changes" comment="начал мини-проект по анализу действий пользователя&#10;реализовал подгрузку ксвшек, смержил их в один датасет&#10;вывел сводку по датасету&#10;вывел топ пользователей по успешности операций">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stepic-analyse/4_operations.py" beforeDir="false" afterPath="$PROJECT_DIR$/stepic-analyse/4_operations.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,27 +49,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.4_operations">
-    <configuration name="1_taxi" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="education" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/stepic-analyse" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/stepic-analyse/1_taxi.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="2_taxi_peru" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="education" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -134,6 +112,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="frequency-analyse" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="education" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$APPLICATION_CONFIG_DIR$/scratches" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/frequency-analyse.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="education" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -179,10 +178,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.4_operations" />
+        <item itemvalue="Python.frequency-analyse" />
         <item itemvalue="Python.some-shit (1)" />
         <item itemvalue="Python.3_hotel" />
         <item itemvalue="Python.2_taxi_peru" />
-        <item itemvalue="Python.1_taxi" />
       </list>
     </recent_temporary>
   </component>
@@ -216,7 +215,14 @@
       <option name="project" value="LOCAL" />
       <updated>1643813529682</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="начал мини-проект по анализу действий пользователя&#10;реализовал подгрузку ксвшек, смержил их в один датасет&#10;вывел сводку по датасету&#10;вывел топ пользователей по успешности операций">
+      <created>1643822256821</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1643822256821</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -234,6 +240,7 @@
     <MESSAGE value="- вывел самые отменяемые месяцы для CityHotel&#10;- вывел наиболее заселяемую возрастную группу&#10;- вывел наиболее поплярный тип отеля для клиентов с детьми&#10;- сравнил отток клиентов для двух групп: с детьми и без&#10;- починил кодировку в 3_hotel_readme.txt" />
     <MESSAGE value="старт проектика по работе с googletrans" />
     <MESSAGE value="поправил структру проекта&#10;теперь все датасеты при первом запуске скрипта автоматически подгружаются из инета и сохраняются рядом со скриптом с тем же названием, только .csv&#10;добавил 2_taxi_peru.py с отрисовкой распределения оценок&#10;поправил README.txt&#10;обновил конспекты по теории" />
-    <option name="LAST_COMMIT_MESSAGE" value="поправил структру проекта&#10;теперь все датасеты при первом запуске скрипта автоматически подгружаются из инета и сохраняются рядом со скриптом с тем же названием, только .csv&#10;добавил 2_taxi_peru.py с отрисовкой распределения оценок&#10;поправил README.txt&#10;обновил конспекты по теории" />
+    <MESSAGE value="начал мини-проект по анализу действий пользователя&#10;реализовал подгрузку ксвшек, смержил их в один датасет&#10;вывел сводку по датасету&#10;вывел топ пользователей по успешности операций" />
+    <option name="LAST_COMMIT_MESSAGE" value="начал мини-проект по анализу действий пользователя&#10;реализовал подгрузку ксвшек, смержил их в один датасет&#10;вывел сводку по датасету&#10;вывел топ пользователей по успешности операций" />
   </component>
 </project>
